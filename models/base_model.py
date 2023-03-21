@@ -1,12 +1,11 @@
 #!/usr/bin/python3
 """Defines the BaseModel class."""
+import uuid
 import models
-from uuid import uuid4
 from datetime import datetime
+import sqlalchemy
+from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column
-from sqlalchemy import DateTime
-from sqlalchemy import String
 
 Base = declarative_base()
 
@@ -38,6 +37,26 @@ class BaseModel:
                 if key != "__class__":
                     setattr(self, key, value)
 
+    def __str__(self):
+        """returns a string
+        Return:
+            returns a string of class name, id, and dictionary
+        """
+        return "[{}] ({}) {}".format(
+            type(self).__name__, self.id, self.__dict__)
+            
+
+    def __str__(self):
+        """Return the print/str representation of the BaseModel instance."""
+        d = self.__dict__.copy()
+        d.pop("_sa_instance_state", None)
+        return "[{}] ({}) {}".format(type(self).__name__, self.id, d)
+
+    def __repr__(self):
+        """return a string representaion
+        """
+        return self.__str__()
+
     def save(self):
         """Update updated_at with the current datetime."""
         self.updated_at = datetime.utcnow()
@@ -49,19 +68,17 @@ class BaseModel:
         Includes the key/value pair __class__ representing
         the class name of the object.
         """
-        my_dict = self.__dict__.copy()
+        my_dict = dict(self.__dict__)
         my_dict["__class__"] = str(type(self).__name__)
         my_dict["created_at"] = self.created_at.isoformat()
         my_dict["updated_at"] = self.updated_at.isoformat()
-        my_dict.pop("_sa_instance_state", None)
+
+        if "_sa_instance_state" in my_dict:
+            del my_dict["_sa_instance_state"]
+
         return my_dict
+        
 
     def delete(self):
         """Delete the current instance from storage."""
         models.storage.delete(self)
-
-    def __str__(self):
-        """Return the print/str representation of the BaseModel instance."""
-        d = self.__dict__.copy()
-        d.pop("_sa_instance_state", None)
-        return "[{}] ({}) {}".format(type(self).__name__, self.id, d)

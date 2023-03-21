@@ -1,15 +1,16 @@
 #!/usr/bin/python3
-"""Database storage"""
+import models
 from models.base_model import BaseModel, Base
-from models.amenity import Amenity
 from models.city import City
 from models.place import Place
 from models.review import Review
 from models.state import State
 from models.user import User
-from sqlalchemy import (create_engine)
-from sqlalchemy.orm import sessionmaker, relationship, scoped_session
+from models.amenity import Amenity
+import sqlalchemy
 from os import getenv
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, scoped_session
 
 
 class DBStorage:
@@ -27,29 +28,22 @@ class DBStorage:
                                               getenv('HBNB_MYSQL_HOST'),
                                               getenv('HBNB_MYSQL_DB')),
                                       pool_pre_ping=True)
+        Base.metadata.create_all(self.__engine)
         if getenv('HBNB_ENV') == 'test':
-            Base.metadata.drop_all(bind=self.__engine)
+            Base.metadata.drop_all(self.__engine)
+        Session = sessionmaker(bind=self.__engine)
+        self.__session = Session()
 
     def all(self, cls=None):
         """Method that queries on the currect database session"""
         objects_dictionary = {}
-
-        if cls is None:
-            objects_list = self.__session.query(State).all()
-            objects_list.extend(self.__session.query(City).all())
-            objects_list.extend(self.__session.query(User).all())
-            objects_list.extend(self.__session.query(Place).all())
-            objects_list.extend(self.__session.query(Review).all())
-            objects_list.extend(self.__session.query(Amenity).all())
-        else:
-            if type(cls) == str:
-                cls = eval(cls)
-            objects_list = self.__session.query(cls).all()
-
-        for obj in objects_list:
-            key = "{}.{}".format(type(obj).__name__, obj.id)
-            objects_dictionary[key] = obj
-
+        classes = [State, City, User, Place, Review, Amenity]
+        if cls:
+            classes = [cls]
+        for j in classes:
+            for k in self.__session.query(j).all():
+                key = "{}.{}".format(type(k).__name__, k.id)
+                objects_dictionary[key] = k
         return objects_dictionary
 
     def new(self, obj):
@@ -76,7 +70,3 @@ class DBStorage:
                                   expire_on_commit=False)
         Session = scoped_session(my_session)
         self.__session = Session()
-
-    def close(self):
-        """Method that closes the session"""
-        self.__session.close()
