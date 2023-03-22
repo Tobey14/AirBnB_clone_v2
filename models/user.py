@@ -1,8 +1,7 @@
 #!/usr/bin/python3
 """This is the user class"""
-from models.base_model import Base, BaseModel
-from sqlalchemy import Column, Integer, String
-import sqlalchemy
+from models.base_model import BaseModel, Base
+from sqlalchemy import Columnp, String
 from sqlalchemy.orm import backref, relationship
 from os import getenv
 
