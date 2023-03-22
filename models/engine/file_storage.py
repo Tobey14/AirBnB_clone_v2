@@ -1,13 +1,6 @@
 #!/usr/bin/python3
 """This module defines a class to manage file storage for hbnb clone"""
 import json
-from models.base_model import BaseModel
-from models.user import User
-from models.place import Place
-from models.state import State
-from models.city import City
-from models.amenity import Amenity
-from models.review import Review
 
 
 class FileStorage:
@@ -17,15 +10,14 @@ class FileStorage:
 
     def all(self, cls=None):
         """Returns a dictionary of models currently in storage"""
-        if cls:
-            if type(cls) == str:
-                cls = eval(cls)
-            my_dict = {}
-            for key, value in self.__objects.items():
-                if type(value) == cls:
-                    my_dict[key] = value
-            return my_dict
-        return self.__objects
+        if cls is not None:
+            cls_objects = {}
+            for k, v in FileStorage.__objects.items():
+                if k.startswith(cls.__name__):
+                    cls_objects.update({k: v})
+            return cls_objects
+        else:
+            return FileStorage.__objects
 
     def new(self, obj):
         """Adds new object to storage dictionary"""
@@ -38,16 +30,31 @@ class FileStorage:
             temp.update(FileStorage.__objects)
             for key, val in temp.items():
                 temp[key] = val.to_dict()
-            json.dump(temp, f)
+            json.dump(temp, f, sort_keys=True, indent=4)
+
+    def delete(self, obj=None):
+        """Deletes the object obj if obj is in __objects"""
+        if obj is not None:
+            for k, v in FileStorage.__objects.items():
+                if v is obj:
+                    tmp = k
+            FileStorage.__objects.pop(tmp)
 
     def reload(self):
         """Loads storage dictionary from file"""
+        from models.base_model import BaseModel
+        from models.user import User
+        from models.place import Place
+        from models.state import State
+        from models.city import City
+        from models.amenity import Amenity
+        from models.review import Review
 
         classes = {
-                    'BaseModel': BaseModel, 'User': User, 'Place': Place,
-                    'State': State, 'City': City, 'Amenity': Amenity,
-                    'Review': Review
-                  }
+            'BaseModel': BaseModel, 'User': User, 'Place': Place,
+            'State': State, 'City': City, 'Amenity': Amenity,
+            'Review': Review
+        }
         try:
             temp = {}
             with open(FileStorage.__file_path, 'r') as f:
@@ -57,14 +64,6 @@ class FileStorage:
         except FileNotFoundError:
             pass
 
-    def delete(self, obj=None):
-        """Deletes and object from __objects"""
-        if (obj):
-            key = "{}.{}".format(type(obj).__name__, obj.id)
-            del self.__objects[key]
-
     def close(self):
-        """Calls reload method for deserializing
-        the JSON file to objects
-        """
+        """Handles storage close"""
         self.reload()
