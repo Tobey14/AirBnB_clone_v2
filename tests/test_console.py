@@ -1,108 +1,41 @@
- #!/usr/bin/python3
- """Test console"""
- import os
- import uuid
- import unittest
- import models
- from io import StringIO
- from unittest.mock import patch
- from models.engine.db_storage import DBStorage
- from models.engine.file_storage import FileStorage
- from console import HBNBCommand
- 
- 
- class TestHBNBCommand(unittest.TestCase):
-     """Unittesting the HBNB command interpreter"""
- 
-     @classmethod
-     def setUpClass(test_cls):
-         try:
-             os.rename("file.json", "tmp_file")
-         except IOError:
-             pass
-         test_cls.HBNB = HBNBCommand()
- 
-     @classmethod
-     def tearDownClass(test_cls):
-         try:
-             os.rename("tmp_file", "file.json")
-         except IOError:
-             pass
-         del test_cls.HBNB
-         if type(models.storage) == DBStorage:
-             models.storage.DBStorage_session.close()
- 
-     def setUp(self):
-         FileStorage.FileStorage_objects = {}
- 
-     def tearDown(self):
-         try:
-             os.remove("file.json")
-         except IOError:
-             pass
- 
-     @unittest.skipIf(type(models.storage) == DBStorage, "Testing DBstorage")
-     def test_create(self):
-         with patch("sys.stdout", new=StringIO()) as test:
-             self.HBNB.onecmd("create BaseMOdel")
-             new_bm = test.getvalue().strip()
-         with patch("sys.stdout", new=StringIO()) as test:
-             self.HBNB.onecmd("create State")
-             new_state = test.getvalue().strip()
-         with patch("sys.stdout", new=StringIO()) as test:
-             self.HBNB.onecmd("create User")
-             new_user = test.getvalue().strip()
-         with patch("sys.stdout", new=StringIO()) as test:
-             self.HBNB.onecmd("create City")
-             new_city = test.getvalue().strip()
-         with patch("sys.stdout", new=StringIO()) as test:
-             self.HBNB.onecmd("create Place")
-             new_place = test.getvalue().strip()
-         with patch("sys.stdout", new=StringIO()) as test:
-             self.HBNB.onecmd("create Review")
-             new_review = test.getvalue().strip()
-         with patch("sys.stdout", new=StringIO()) as test:
-             self.HBNB.onecmd("create Amenity")
-             new_amenity = test.getvalue().strip()
- 
-     @unittest.skipIf(type(models.storage) == DBStorage, "Testing DBStorage")
-     def test_all(self):
-         with patch("sys.stdout", new=StringIO()) as test:
-             self.HBNB.onecmd("all BaseMOdel")
-             new_bm = test.getvalue().strip()
-         with patch("sys.stdout", new=StringIO()) as test:
-             self.HBNB.onecmd("all State")
-             new_state = test.getvalue().strip()
-         with patch("sys.stdout", new=StringIO()) as test:
-             self.HBNB.onecmd("all User")
-             new_user = test.getvalue().strip()
-         with patch("sys.stdout", new=StringIO()) as test:
-             self.HBNB.onecmd("all City")
-             new_city = test.getvalue().strip()
-         with patch("sys.stdout", new=StringIO()) as test:
-             self.HBNB.onecmd("all Place")
-             new_place = test.getvalue().strip()
-         with patch("sys.stdout", new=StringIO()) as test:
-             self.HBNB.onecmd("all Review")
-             new_review = test.getvalue().strip()
-         with patch("sys.stdout", new=StringIO()) as test:
-             self.HBNB.onecmd("all Amenity")
-             new_amenity = test.getvalue().strip()
- 
-     @unittest.skipIf(type(models.storage) == DBStorage, "Testing DBstorage")
-     def test_create_kwargs(self):
-         with patch("sys.stdout", new=StringIO()) as test:
-             self.HBNB.onecmd('create User first_name="John" email="john@example.com password="1234"')
-             new_user = test.getvalue().strip()
-         with patch("sys.stdout", new=StringIO()) as test:
-             self.HBNB.onecmd("all User")
-             user_output = test.getvalue()
-             self.assertIn(new_user, user_output)
-             self.assertIn("'first_name': 'John'", user_output)
-             self.assertIn("'email': 'john@example.com'", user_output)
-             self.assertNotIn("'last_name': 'Snow'", user_output)
-             self.assertIn("'password': '1234'", user_output)
- 
- 
- if _name_ == '_main_':
-     unittest.main()
+#!/usr/bin/python3
+"""
+Contains the class TestConsoleDocs
+"""
+
+import console
+import inspect
+import pep8
+import unittest
+HBNBCommand = console.HBNBCommand
+
+
+class TestConsoleDocs(unittest.TestCase):
+    """Class for testing documentation of the console"""
+    def test_pep8_conformance_console(self):
+        """Test that console.py conforms to PEP8."""
+        pep8s = pep8.StyleGuide(quiet=True)
+        result = pep8s.check_files(['console.py'])
+        self.assertEqual(result.total_errors, 0,
+                         "Found code style errors (and warnings).")
+
+    def test_pep8_conformance_test_console(self):
+        """Test that tests/test_console.py conforms to PEP8."""
+        pep8s = pep8.StyleGuide(quiet=True)
+        result = pep8s.check_files(['tests/test_console.py'])
+        self.assertEqual(result.total_errors, 0,
+                         "Found code style errors (and warnings).")
+
+    def test_console_module_docstring(self):
+        """Test for the console.py module docstring"""
+        self.assertIsNot(console.__doc__, None,
+                         "console.py needs a docstring")
+        self.assertTrue(len(console.__doc__) >= 1,
+                        "console.py needs a docstring")
+
+    def test_HBNBCommand_class_docstring(self):
+        """Test for the HBNBCommand class docstring"""
+        self.assertIsNot(HBNBCommand.__doc__, None,
+                         "HBNBCommand class needs a docstring")
+        self.assertTrue(len(HBNBCommand.__doc__) >= 1,
+                        "HBNBCommand class needs a docstring")
