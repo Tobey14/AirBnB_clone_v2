@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Sets up your web servers for the deployment of web_static
-sudo apt-get -y update
+sudo apt-get update
 sudo apt-get -y install nginx
 sudo ufw allow 'Nginx HTTP'
 
@@ -14,7 +14,7 @@ sudo echo "<html>
   <head>
   </head>
   <body>
-    ALX School
+    Holberton School
   </body>
 </html>" | sudo tee /data/web_static/releases/test/index.html
 
