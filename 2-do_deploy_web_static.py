@@ -3,11 +3,12 @@ from fabric.api import put, run, local, env
 from os import path
 
 
-env.hosts = ["34.239.249.71", "100.26.166.182"]
+env.hosts = ["35.168.3.38", "100.24.238.105"]
 
 
 def do_deploy(archive_path):
-    """ distributes an archive to a web server """
+    """Fabric script that distributes
+    an archive to your web server"""
 
     if not path.exists(archive_path):
         return False
